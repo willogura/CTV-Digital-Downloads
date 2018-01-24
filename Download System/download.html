@@ -1,0 +1,304 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+
+            <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+            <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
+
+            <!-- Latest compiled and minified CSS -->
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+
+            <!-- Latest compiled and minified JavaScript -->
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+    <style type="text/css">
+
+  .close {
+  	background: #606061;
+  	color: #FFFFFF;
+  	line-height: 25px;
+  	position: absolute;
+  	right: -12px;
+  	text-align: center;
+  	top: -10px;
+  	width: 24px;
+  	text-decoration: none;
+  	font-weight: bold;
+  	-webkit-border-radius: 12px;
+  	-moz-border-radius: 12px;
+  	border-radius: 12px;
+  	-moz-box-shadow: 1px 1px 3px #000;
+  	-webkit-box-shadow: 1px 1px 3px #000;
+  	box-shadow: 1px 1px 3px #000;
+  }
+
+  .close:hover { background: #00d9ff; }
+  .orange {
+  	clear: left;
+  	background: #eb862a;
+  	text-align: center;
+  	color: #fff;
+  	border-radius: 5px;
+  	font-size: 20pt;
+  	width: 300px;
+  	margin: auto;
+  	}
+  .instruct{
+  	text-align: center;
+  		}
+  img{
+  	float: left;
+  	margin-top: 20px;
+  	margin-left: 20px;
+  	margin-right: 20px;
+  	padding-bottom: 8px;
+    width: 20%;
+
+  	}
+  h2{
+  	text-align: center;
+  	padding-top: 40px;
+  	font-size: 22pt;
+  }
+
+  body.noscroll
+  {
+      position: fixed;
+      overflow-y: scroll;
+      width: 100%;
+  }
+
+
+    </style>
+
+
+
+
+
+
+  </head>
+
+  <body>
+
+
+
+
+        <script>
+
+    var url = getUrlVars()["value_key"];
+
+
+    if(url)
+
+{
+  var uri_dec = decodeURIComponent(url);
+
+
+
+
+url = uri_dec;
+
+}
+
+    function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+    vars[key] = value;
+    });
+    return vars;
+    }
+
+
+
+
+
+
+    function showhide()
+     {
+           var div = document.getElementById("download");
+           if (div.style.display !== "none") {
+              div.style.display = "none";
+            }
+              else {
+                div.style.display = "block";
+              }
+    }
+    $('body').addClass('noscroll');
+
+
+
+if(!url) {
+
+    $('body').removeClass('noscroll');
+  document.write('<style>.download { display: none; }</style>');
+
+
+
+}
+
+
+
+var browser = "";
+
+if (navigator.userAgent.indexOf("Firefox") != -1)
+{
+
+  browser = "firefox";
+    //Your firefox code
+}else {
+
+browser = "safari";
+
+    function SaveToDisk(fileURL, fileName) {
+        // for non-IE
+        if (!window.ActiveXObject) {
+            var save = document.createElement('a');
+            save.href = fileURL;
+            save.target = '_blank';
+            save.download = fileName || 'unknown';
+
+            var evt = new MouseEvent('click', {
+                'view': window,
+                'bubbles': true,
+                'cancelable': false
+            });
+            save.dispatchEvent(evt);
+
+            (window.URL || window.webkitURL).revokeObjectURL(save.href);
+        }
+
+        // for IE < 11
+        else if ( !! window.ActiveXObject && document.execCommand)     {
+            var _window = window.open(fileURL, '_blank');
+            _window.document.close();
+            _window.document.execCommand('SaveAs', true, fileName || fileURL)
+            _window.close();
+        }
+    }
+
+    if (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0)
+    {
+      // alert("Browser is Safari");
+
+
+
+    } else {
+
+    setTimeout(function() {
+
+
+        downloadFile(url); // UNCOMMENT THIS LINE TO MAKE IT WORK
+
+    }, 0);
+
+    // Source: http://pixelscommander.com/en/javascript/javascript-file-download-ignore-content-type/
+    window.downloadFile = function (sUrl) {
+
+        //iOS devices do not support downloading. We have to inform user about this.
+        if (/(iP)/g.test(navigator.userAgent)) {
+           alert('Your device does not support files downloading. Please try again in desktop browser.');
+           window.open(sUrl, '_blank');
+           return false;
+        }
+
+        //If in Chrome or Safari - download via virtual link click
+        if (window.downloadFile.isChrome || window.downloadFile.isSafari) {
+            //Creating new link node.
+            var link = document.createElement('a');
+            link.href = sUrl;
+            link.setAttribute('target','_blank');
+
+            if (link.download !== undefined) {
+                //Set HTML5 download attribute. This will prevent file from opening if supported.
+                var fileName = sUrl.substring(sUrl.lastIndexOf('/') + 1, sUrl.length);
+                link.download = fileName;
+            }
+
+            //Dispatching click event.
+            if (document.createEvent) {
+                var e = document.createEvent('MouseEvents');
+                e.initEvent('click', true, true);
+                link.dispatchEvent(e);
+                return true;
+            }
+        }
+
+        // Force file download (whether supported by server).
+        if (sUrl.indexOf('?') === -1) {
+            sUrl += '?download';
+        }
+
+        window.open(sUrl, '_blank');
+
+        return true;
+    }
+
+    window.downloadFile.isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+
+    if (window.downloadFile.isChrome) {
+browser = "chrome";
+      setTimeout(function() {
+
+    //  window.location = "http://www.ctv15.org/index.php";
+    }, 900);
+
+    }
+
+
+    window.downloadFile.isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;
+
+    }
+
+}
+
+    </script>
+
+ <!--    <div id="download" class="download" style="height: 2000px; background-color: grey">
+      <div style="position: relative; height: 420px; border: 1px solid black; background-color: white;  	width: 500px;
+
+top: 5%;
+margin:0 auto;
+   	border-radius: 5px;"> -->
+
+    <div >
+      <div class="modal-header">
+
+        <h4 class="modal-title"  >File Download</h4>
+
+      </div>
+      <div >
+          <img src="/content/images/logos/ctvlogo.png">
+
+           <!-- File path inside public_html folder -->
+           <h2>Thank you for <br>your purchase</h2>
+           <!-- Next line can be removed if unneeded. Don't remove its class info from head because it's used again -->
+           <br><script>if(browser == "chrome") {document.write('<p class="instruct"> Your video should automatically download.<br>If the download does not start in 10 seconds,<br>please click the download button</p>')}</script>
+
+           <p class="orange"><strong><script>if(browser == "safari") {document.write('<a id="downloadURL" href="'+url+'" target="_blank" download> Right Click To Download </a></strong></p><br><p class="instruct"> Please <b>Right-Click</b> or <b>Command+Click</b> the button <br>then select <b>Download Linked File</b>')}
+           if(browser == "firefox") {document.write('<a id="downloadURL" href="'+url+'" target="_blank" download> Download </a></strong></p><br><p class="instruct"> Please <b>Click</b> the button<br> then select <b>Save File</b>')}
+           if(browser == "chrome") {document.write('<a id="downloadURL" href="'+url+'" target="_blank" download> Download </a></strong></p>')} </script>  </a></strong></p><br>
+<p class="instruct">For additional help go to our <a href="http://www.ctv15.org/additional-videos/606-download-help" target="_blank">download help page.</a></p>
+<p class="instruct">To return to the CTV store <a href="http://www.ctv15.org/store/order-a-dvd" target="_blank">click here.</a></p>
+</div>
+
+
+
+     <div class="modal-footer">
+    <a class="btn btn-default" href="http://www.ctv15.org/store/order-a-dvd" target="_blank">Return</a></div>
+
+     </div>
+
+
+
+        </div>
+
+
+</body>
+</html>

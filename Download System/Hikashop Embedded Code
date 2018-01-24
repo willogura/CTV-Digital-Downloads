@@ -1,0 +1,454 @@
+{source 0}
+<form>
+</form>
+<script src = "http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src = "bootstrap/js/bootstrap.js"></script>
+
+
+
+<!-- Start of Script -->
+
+<style type="text/css">
+
+
+
+#openModal{
+
+
+
+          display : none;
+
+          position: fixed;
+
+
+}
+
+
+
+
+
+
+.instruct{
+	text-align: center;
+		}
+
+h2{
+	text-align: center;
+	padding-top: 10px;
+	font-size: 24pt;
+}
+
+#fileSize{
+	font-size: 22px;
+}
+#oneTime{
+		font-size: 22px;
+	}
+	.button a {
+		text-decoration: none;
+		color: #fff;
+	}
+  </style>
+
+
+
+
+
+
+</script>
+
+<?php
+
+
+
+$searchString = "baseball";
+
+
+
+
+
+
+$title = $vod->Title;
+//Configure
+$server = "trms.ctv15.org";
+date_default_timezone_set('America/New_York');
+// End Configure
+
+$client = new SoapClient("http://" . $server . "/CablecastWS/CablecastWS.asmx?WSDL");  // Creates New SOAP client using WSDL file
+$showDetailsURL = "http://trms.ctv15.org/Cablecast/public-site/index.html#/show/";  // Must end with a '?' or '&'
+$searchDate = date("Y-m-d")."T12:00:00";
+$eventDateFormatYear = "Y";
+$eventDateFormat = "F jS Y";
+
+function isMobile() {
+    return preg_match("/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i", $_SERVER["HTTP_USER_AGENT"]);
+}
+
+function getRemoteFilesize($url1, $formatSize = true, $useHead = true)
+{
+    if (false !== $useHead) {
+        stream_context_set_default(array('http' => array('method' => 'HEAD')));
+    }
+    $head = array_change_key_case(get_headers($url1, 1));
+    // content-length of download (in bytes), read from Content-Length: field
+    $clen = isset($head['content-length']) ? $head['content-length'] : 0;
+
+    // cannot retrieve file size, return "-1"
+    if (!$clen) {
+        return -1;
+    }
+
+    if (!$formatSize) {
+        return $clen; // return size in bytes
+    }
+
+    $size = $clen;
+    switch ($clen) {
+        case $clen < 1024:
+            $size = $clen .' B'; break;
+        case $clen < 1048576:
+            $size = round($clen / 1024, 2) .' KBs'; break;
+        case $clen < 1073741824:
+            $size = round($clen / 1048576, 2) . ' MBs'; break;
+        case $clen < 1099511627776:
+            $size = round($clen / 1073741824, 2) . ' GBs'; break;
+    }
+
+    return $size; // return formatted size
+}
+
+
+
+
+// Search for all shows that have an event date less than now that are available for VOD
+$result = $client->AdvancedShowSearch(array(
+
+    'ChannelID'        => 1,
+  'searchString'         => $searchString,
+    'eventDate'           => date("Y-m-d") . "T00:00:00",
+  'dateComparator'      => '<',
+    'restrictToCategoryID'  => 42,
+    'restrictToProducerID'   => 0,
+    'restrictToProjectID'    =>  0,
+    'displayStreamingShowsOnly'   =>  0,
+    'searchOtherSites'     =>   0,
+
+  ));
+
+
+if(!isset($result->AdvancedShowSearchResult->SiteSearchResult->Shows->ShowInfo)) {
+    $vods = array();
+} else {
+    $vods = is_array($result->AdvancedShowSearchResult->SiteSearchResult->Shows->ShowInfo) ?
+        $result->AdvancedShowSearchResult->SiteSearchResult->Shows->ShowInfo :
+        array($result->AdvancedShowSearchResult->SiteSearchResult->Shows->ShowInfo);
+}
+
+
+if(count($vods) == '0') {
+    //There is probably something wrong if this shows up.
+    echo "There are now Shows currently available for on demand viewing.";
+} else {
+    // Prints out a table with time and show title with link to show detial page
+    echo '<table     style="border-collapse: separate;
+    border-spacing: 0 2em;width:100%">';
+    echo "<th class='programtitle'>Program Title</th><th class='Event'>Event Date</th></tr>\n";
+
+
+
+    foreach($vods as $vod) {
+
+
+
+if(date($eventDateFormatYear,strtotime($vod->EventDate)) == '2017'){
+
+
+$var = $vod->VodDirectLink;
+$title = $vod->Title;
+
+
+$size = "";
+
+
+if(!isMobile()){
+
+
+if ($var) {
+
+$size = getRemoteFilesize($var);
+
+};
+
+};
+
+
+
+    echo "<tr>\n";
+    echo "<td style='  font-size:14px;'>";
+
+
+
+
+  echo '
+  <a data-id="'. $title .'" data-url="'. $var .'"   data-size= "'. $size .'" title="Add this item" data-toggle="modal" class="open-openModal " href="#openModal" \>'.$title.'</a>
+
+  ';
+echo "
+    </td>
+\n";
+ $count++;
+ echo "<td class='dateformat' style='font-size:12px; text-align:center;'>".date($eventDateFormat,strtotime($vod->EventDate))."</td>
+
+\n";
+ $count++;
+
+
+
+
+
+}
+    echo "</tr>\n";
+    }
+    echo "</table>";
+}
+
+echo '
+';
+
+?>
+
+
+
+
+<div id="openModal" class="modal fade" role="dialog">
+<div class="modal-dialog">
+
+ <!-- Modal content-->
+ <div class="modal-content" >
+   <div class="modal-header">
+     <button type="button" class="close" data-dismiss="modal">×</button>
+     <h4 class="modal-title" id="mTitle" >CTV Northsuburbs</h4>
+
+   </div>
+   <div class="modal-body">
+
+
+		<p style="margin-top:40px; "class="instruct"><strong>Digital Downloads are not available on mobile devices</strong></p>
+		<!-- This line is where your variable re:filesize. Please leave p-tags, class/id intact for formatting, if possible. -->
+
+		<p class="instruct"  id="fileSize">The following file is *variable amount*</p>
+		<p class="instruct" id="oneTime">Once purchase is complete, you will only be able to download <strong>one time</strong></p>
+		<p class="instruct" id="instructions">For detailed instructions on how to install and play your download, <a href="http://www.ctvnorthsuburbs.org/additional-videos/606-download-help" target="_blank">click here</a><br>
+		If you encounter problems, please contact <a href="mailto:download@ctvnorthsuburbs.org">download@ctvnorthsuburbs.org</a></p>
+		<!-- The buttons on the bottom of the page. Placeholders should be converted to functioning links. -->
+		<div style="
+     margin: auto;
+     right: 0;
+     left: 0;
+
+     width: 100px;
+    ">
+
+
+  <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" >
+
+<input type="hidden" name="cmd" value="_s-xclick">
+
+<input type="hidden"  name="hosted_button_id" value="MYTTA2BKNET66">
+
+
+<table  style="margin-left:-50px;">
+<tr><td><input type="hidden" name="on0" value="Bundles"><br/></td></tr><tr><td><select name="os0">
+
+
+
+<script>
+
+var isMobile = {
+    Android: function() {
+        return navigator.userAgent.match(/Android/i);
+    },
+    BlackBerry: function() {
+        return navigator.userAgent.match(/BlackBerry/i);
+    },
+    iOS: function() {
+        return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+    },
+    Opera: function() {
+        return navigator.userAgent.match(/Opera Mini/i);
+    },
+    Windows: function() {
+        return navigator.userAgent.match(/IEMobile/i) || navigator.userAgent.match(/WPDesktop/i);
+    },
+    any: function() {
+        return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+    }
+};
+
+
+
+
+
+
+
+if(!isMobile.any()  )  {
+
+
+
+document.write('<option value="DVD">DVD only $20.00</option>') ;
+
+document.write('<option value="Digital Download">Digital Download $10.00</option>');
+
+document.write('<option value="DVD & Download">DVD & Download $25.00</option>');
+
+document.write('<input type="hidden" name="cbt" value="Download Digital Video">') ;
+
+
+
+} else {
+
+document.write('<option value="DVD">DVD only $20.00</option>') ;
+
+}
+
+
+
+</script>
+
+
+</select> </td></tr>
+</table>
+
+
+
+
+<input type="hidden" name="currency_code" value="USD">
+
+
+	<input  style="display: none;" id="titleInput" name="item_name" required="" type="text" value="test" />
+
+
+
+<input type='hidden' name='return' id="urlInput" value='http://www.ctv15.org/store'>
+
+<input style="padding-left:5px"onclick=CalculateOrder(this.form) type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+</div>
+<br>
+     <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<script>
+
+
+
+
+
+
+function updateTitle(t) {
+
+ document.getElementById("titleInput").value = t;
+};
+
+
+function updateURL(u) {
+
+
+returnURL = "http://trms.ctv15.org/download.html?value_key=" + u;
+
+ document.getElementById("urlInput").value = returnURL;
+};
+
+$(document).on("click", ".open-openModal", function (e) {
+
+
+
+    e.preventDefault();
+
+    var _self = $(this);
+
+var title = _self.data('id');
+
+var size = _self.data('size');
+ url =  _self.data('url');
+
+if( isMobile.any() ) {
+
+
+document.getElementById("fileSize").innerHTML = "";
+
+document.getElementById("mTitle").innerHTML = "";
+
+document.getElementById("oneTime").innerHTML = "";
+
+document.getElementById("instructions").innerHTML = "";
+document.getElementById("titleInput").value = title;
+
+} else {
+
+if(url!="") {
+
+
+
+document.getElementById("fileSize").innerHTML = "The following file is " + size;
+
+document.getElementById("mTitle").innerHTML = title;
+
+document.getElementById("titleInput").value = title;
+
+document.getElementById("oneTime").innerHTML = "Once purchase is complete, you will only be able to download <strong>one time</strong>";
+
+
+
+
+
+
+
+updateTitle(title);
+
+updateURL(url);
+
+} else {
+
+
+
+document.getElementById("fileSize").innerHTML = "The following file is not currently available as a <b>Digital Download</b> at this time";
+
+
+
+document.getElementById("oneTime").innerHTML = "Please Select DVD only";
+
+
+document.getElementById("mTitle").innerHTML = title;
+
+document.getElementById("titleInput").value = title;
+
+updateTitle(title);
+
+updateURL(url);
+}
+
+
+
+}
+
+
+
+    $(_self.attr('href')).modal('show');
+});
+
+
+
+
+
+</script>
+
+
+
+{/source}
